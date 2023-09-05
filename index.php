@@ -118,7 +118,7 @@
         // Check if the city name is not empty
         if (!empty($cityName)) {
             // OpenWeather API key for authentication
-            $apiKey = "c90265758d6d690ed02c2c3f3028ca77";
+            $apiKey = "c90265758d6d690ed02c2c3f3028ca77"; // Replace with your actual API key
             
             // API URL for fetching weather data
             $apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$apiKey";
@@ -135,40 +135,37 @@
                     $temperature = $data->main->temp - 273.15; // Convert from Kelvin to Celsius
                     $weatherDescription = $data->weather[0]->description;
                     $weatherIconCode = $data->weather[0]->icon;
-                    $validityTime = date("H:i l d F Y", $data->dt); // Convert timestamp 
+                    $timezoneOffset = $data->timezone; // Get timezone offset from API
+
+                    // Create a DateTime object with the UTC timestamp
+                    $utcTimestamp = new DateTime('@' . $data->dt);
+
+                    // Set the timezone based on the offset
+                    $utcTimestamp->setTimezone(new DateTimeZone('UTC'));
+                    $localTimestamp = clone $utcTimestamp;
+                    $localTimestamp->add(new DateInterval('PT' . $timezoneOffset . 'S'));
 
                     // Display weather information
                     echo "<div class='weather-container'>";
-                    /*echo "<div>";
+                    
+                    // First row, two columns
+                    echo "<div class='weather-row'>";
+                    echo "<div class='weather-info'>";
                     echo "<h2>Weather in $cityName</h2>";
                     echo "<p>Temperature: " . number_format($temperature, 2) . " &deg;C</p>";
                     echo "<p>Description: $weatherDescription</p>";
-                    echo "<p>Valid until: $validityTime</p>";
                     echo "</div>";
-                    
-                    // Display the weather icon
                     echo "<img src='" . getWeatherIconUrl($weatherIconCode) . "' alt='Weather Icon' class='weather-icon'>";
-                    echo "</div>";*/
+                    echo "</div>";
 
-                     // First row, two columns
-                     echo "<div class='weather-row'>";
-                     echo "<div class='weather-info'>";
-                     echo "<h2>Weather in $cityName</h2>";
-                     echo "<p>Temperature: " . number_format($temperature, 2) . " &deg;C</p>";
-                     echo "<p>Description: $weatherDescription</p>";
-                     echo "</div>";
-                     echo "<img src='" . getWeatherIconUrl($weatherIconCode) . "' alt='Weather Icon' class='weather-icon'>";
-                     echo "</div>";
- 
-                     // Second row, single column
-                     echo "<div class='weather-row'>";
-                     echo "<div class='validity-time'>";
-                     echo "<p>Valid until: $validityTime</p>";
-                     echo "</div>";
-                     echo "</div>";
+                    // Second row, single column
+                    echo "<div class='weather-row'>";
+                    echo "<div class='validity-time'>";
+                    echo "<p>Valid until: " . $localTimestamp->format("H:i l d F Y") . " (Local Time)</p>";
+                    echo "</div>";
+                    echo "</div>";
                      
-                     echo "</div>";
-
+                    echo "</div>";
 
                 } else {
                     echo "<p>Error parsing API response.</p>";
