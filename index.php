@@ -103,7 +103,6 @@
     </form>
 
     </div>
-
     <?php
     // Function to generate the URL for weather icons
     function getWeatherIconUrl($iconCode) {
@@ -118,7 +117,7 @@
         // Check if the city name is not empty
         if (!empty($cityName)) {
             // OpenWeather API key for authentication
-            $apiKey = "c90265758d6d690ed02c2c3f3028ca77"; // Replace with your actual API key
+            $apiKey = "c90265758d6d690ed02c2c3f3028ca77";
             
             // API URL for fetching weather data
             $apiUrl = "https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$apiKey";
@@ -135,15 +134,11 @@
                     $temperature = $data->main->temp - 273.15; // Convert from Kelvin to Celsius
                     $weatherDescription = $data->weather[0]->description;
                     $weatherIconCode = $data->weather[0]->icon;
+                    $cityCoordinates = $data->coord;
+
+                    // Calculate the local time based on the city's time zone offset
                     $timezoneOffset = $data->timezone; // Get timezone offset from API
-
-                    // Create a DateTime object with the UTC timestamp
-                    $utcTimestamp = new DateTime('@' . $data->dt);
-
-                    // Set the timezone based on the offset
-                    $utcTimestamp->setTimezone(new DateTimeZone('UTC'));
-                    $localTimestamp = clone $utcTimestamp;
-                    $localTimestamp->add(new DateInterval('PT' . $timezoneOffset . 'S'));
+                    $localTimestamp = time() + $timezoneOffset;
 
                     // Display weather information
                     echo "<div class='weather-container'>";
@@ -161,12 +156,11 @@
                     // Second row, single column
                     echo "<div class='weather-row'>";
                     echo "<div class='validity-time'>";
-                    echo "<p>Valid until: " . $localTimestamp->format("H:i l d F Y") . " (Local Time)</p>";
+                    echo "<p>Valid until: " . date("H:i l d F Y", $localTimestamp) . " (Local Time)</p>";
                     echo "</div>";
                     echo "</div>";
                      
                     echo "</div>";
-
                 } else {
                     echo "<p>Error parsing API response.</p>";
                 }
